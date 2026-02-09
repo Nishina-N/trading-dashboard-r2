@@ -13,11 +13,12 @@ import {
   fetchIndustryRRS,
   fetchMetadata,
   fetchAvailableDates,
-  fetchSummaries,
+  fetchSummary,
 } from './api/client';
 import type { StockSummary, FilterSettings } from './types/data';
 
 let currentSummaryData: StockSummary[] = [];
+let availableDates: string[] = [];
 
 async function loadCharts() {
   const currentYear = new Date().getFullYear();
@@ -38,29 +39,37 @@ async function loadCharts() {
   createIndustryRRSChart('industry-rrs-chart', 'industry-rrs-legend', industryRRSData);
 }
 
+async function populateDateSelector() {
+  const dateSelector = document.getElementById('date-selector') as HTMLSelectElement;
+  
+  // 利用可能な日付を取得（最新30日）
+  availableDates = await fetchAvailableDates(30);
+  
+  // プルダウンに追加
+  dateSelector.innerHTML = availableDates.map((date, index) => 
+    `<option value="${date}">${date}${index === 0 ? ' (latest)' : ''}</option>`
+  ).join('');
+  
+  console.log('Available dates loaded:', availableDates.length);
+}
+
 async function loadStockTable() {
-  const days = parseInt((document.getElementById('days-slider') as HTMLInputElement).value);
+  const dateSelector = document.getElementById('date-selector') as HTMLSelectElement;
+  const selectedDate = dateSelector.value;
   
-  console.log(`Loading last ${days} available days...`);
-  
-  // 利用可能な日付を取得（最新P件）
-  const dates = await fetchAvailableDates(days);
-  console.log('Available dates:', dates);
-  
-  if (dates.length === 0) {
-    console.error('No summary data available');
+  if (!selectedDate) {
+    console.error('No date selected');
     return;
   }
   
-  // 並列取得
-  const summaries = await fetchSummaries(dates);
+  console.log(`Loading summary for ${selectedDate}...`);
   
-  // 全データを結合
-  currentSummaryData = summaries.flatMap(s => s.stocks);
+  // 選択日のデータを取得
+  const summary = await fetchSummary(selectedDate);
+  currentSummaryData = summary.stocks;
   
-  console.log(`Loaded ${currentSummaryData.length} stock records from ${dates.length} days`);
+  console.log(`Loaded ${currentSummaryData.length} stocks for ${selectedDate}`);
   
-  // テーブル更新
   updateStockTable();
 }
 
@@ -71,7 +80,7 @@ function updateStockTable() {
     stocksPerSector: parseInt((document.getElementById('stocksPerSector-slider') as HTMLInputElement).value),
     stocksPerIndustry: parseInt((document.getElementById('stocksPerIndustry-slider') as HTMLInputElement).value),
     scoreThreshold: parseInt((document.getElementById('score-slider') as HTMLInputElement).value),
-    days: parseInt((document.getElementById('days-slider') as HTMLInputElement).value),
+    days: 1,  // 未使用（互換性のため残す）
   };
   
   createStockTable('stock-table-container', currentSummaryData, filters);
@@ -108,22 +117,9 @@ function setupFilterListeners() {
     scoreValue.textContent = scoreSlider.value;
   });
   
-  const daysSlider = document.getElementById('days-slider') as HTMLInputElement;
-  const daysValue = document.getElementById('days-value')!;
-  daysSlider.addEventListener('input', () => {
-    daysValue.textContent = daysSlider.value;
-  });
-  
+  // Apply ボタン
   document.getElementById('apply-filters')!.addEventListener('click', async () => {
-    const newDays = parseInt(daysSlider.value);
-    const currentDays = currentSummaryData.length > 0 ? 
-      new Set(currentSummaryData.map(s => s.date)).size : 0;
-    
-    if (newDays !== currentDays) {
-      await loadStockTable();
-    } else {
-      updateStockTable();
-    }
+    await loadStockTable();
   });
 }
 
@@ -135,7 +131,13 @@ async function main() {
     lastUpdatedEl.textContent = `Last Updated: ${new Date(metadata.lastUpdated).toLocaleString()}`;
 
     await loadCharts();
+    
+    // 日付プルダウンを設定
+    await populateDateSelector();
+    
     setupFilterListeners();
+    
+    // 初期データ読み込み（最新日）
     await loadStockTable();
 
     console.log('✅ Dashboard loaded successfully!');

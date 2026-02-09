@@ -298,3 +298,25 @@ main {
 .stock-table th.sortable:active {
   background: #4a4e59;
 }
+
+select {
+  width: 100%;
+  padding: 8px 12px;
+  background: #2a2e39;
+  border: 1px solid #3a3e49;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-top: 5px;
+}
+
+select:focus {
+  outline: none;
+  border-color: #2962FF;
+}
+
+select option {
+  background: #2a2e39;
+  color: #fff;
+}

@@ -66,7 +66,7 @@
             <div class="filter-group">
               <label>
                 TOP N Sectors: <span id="topSectors-value">10</span>
-                <input type="range" id="topSectors-slider" min="1" max="50" value="10" step="1">
+                <input type="range" id="topSectors-slider" min="5" max="50" value="10" step="5">
               </label>
             </div>
             
@@ -83,7 +83,7 @@
             <div class="filter-group">
               <label>
                 TOP N Industries: <span id="topIndustries-value">10</span>
-                <input type="range" id="topIndustries-slider" min="1" max="50" value="10" step="1">
+                <input type="range" id="topIndustries-slider" min="5" max="50" value="10" step="5">
               </label>
             </div>
             
@@ -106,8 +106,10 @@
             
             <div class="filter-group">
               <label>
-                Last P Days: <span id="days-value">1</span>
-                <input type="range" id="days-slider" min="1" max="30" value="1" step="1">
+                Select Date:
+                <select id="date-selector">
+                  <option value="">Loading...</option>
+                </select>
               </label>
             </div>
           </div>
