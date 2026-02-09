@@ -30,7 +30,7 @@ export function createIndustryRRSChart(
   const latestData = validData.filter(d => d.date === latestDate);
   const top20Industries = latestData
     .sort((a, b) => a.rank - b.rank)
-    .slice(0, 20)
+    .slice(0, 10)
     .map(d => d.industry!);
 
   const chart = createChart(chartContainer, {
