@@ -1,6 +1,9 @@
 import { createChart, ColorType, CandlestickSeries } from 'lightweight-charts';
 import type { SPXData } from '../types/data';
 
+// デフォルト表示データ数
+const DEFAULT_VISIBLE_BARS = 100;
+
 export function createSPXChart(containerId: string, data: SPXData) {
   const container = document.getElementById(containerId);
   if (!container) {
@@ -45,6 +48,13 @@ export function createSPXChart(containerId: string, data: SPXData) {
 
   console.log('SPX chart data points:', chartData.length);
   candlestickSeries.setData(chartData);
+
+  // 直近N本のデータを表示
+  if (chartData.length > DEFAULT_VISIBLE_BARS) {
+    const from = chartData[chartData.length - DEFAULT_VISIBLE_BARS].time;
+    const to = chartData[chartData.length - 1].time;
+    chart.timeScale().setVisibleRange({ from, to });
+  }
 
   window.addEventListener('resize', () => {
     chart.applyOptions({ width: container.clientWidth });

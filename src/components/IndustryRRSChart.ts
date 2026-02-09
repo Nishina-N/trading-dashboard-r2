@@ -8,6 +8,8 @@ const COLORS = [
   '#651FFF', '#FF6E40', '#00C853', '#FFC400', '#18FFFF'
 ];
 
+const DEFAULT_VISIBLE_BARS = 100;
+
 export function createIndustryRRSChart(
   chartContainerId: string,
   legendContainerId: string,
@@ -18,7 +20,6 @@ export function createIndustryRRSChart(
   
   if (!chartContainer || !legendContainer) return;
 
-  // NaN をフィルタリング
   const validData = data.filter(d => 
     d.industry && 
     typeof d.industry === 'string' && 
@@ -29,7 +30,7 @@ export function createIndustryRRSChart(
   const latestData = validData.filter(d => d.date === latestDate);
   const top20Industries = latestData
     .sort((a, b) => a.rank - b.rank)
-    .slice(0, 10)
+    .slice(0, 20)
     .map(d => d.industry!);
 
   const chart = createChart(chartContainer, {
@@ -73,6 +74,13 @@ export function createIndustryRRSChart(
       latestRank: industryData[industryData.length - 1]?.value || 0,
     };
   });
+
+  const allDates = [...new Set(validData.map(d => d.date))].sort();
+  if (allDates.length > DEFAULT_VISIBLE_BARS) {
+    const from = allDates[allDates.length - DEFAULT_VISIBLE_BARS];
+    const to = allDates[allDates.length - 1];
+    chart.timeScale().setVisibleRange({ from, to });
+  }
 
   legendContainer.innerHTML = '';
   rankings

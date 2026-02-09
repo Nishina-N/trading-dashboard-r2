@@ -6,11 +6,11 @@ import { createIndustryRSChart } from './components/IndustryRSChart';
 import { createIndustryRRSChart } from './components/IndustryRRSChart';
 import { createStockTable } from './components/StockTable';
 import {
-  fetchSPXData,
-  fetchSectorRS,
-  fetchSectorRRS,
-  fetchIndustryRS,
-  fetchIndustryRRS,
+  fetchSPXDataMultiYear,
+  fetchSectorRSMultiYear,
+  fetchSectorRRSMultiYear,
+  fetchIndustryRSMultiYear,
+  fetchIndustryRRSMultiYear,
   fetchMetadata,
   fetchAvailableDates,
   fetchSummary,
@@ -21,31 +21,38 @@ let currentSummaryData: StockSummary[] = [];
 let availableDates: string[] = [];
 
 async function loadCharts() {
+  // 現在年と前年の2年分
   const currentYear = new Date().getFullYear();
+  const years = [currentYear - 1, currentYear];
 
-  const spxData = await fetchSPXData(currentYear);
+  console.log('Loading charts for years:', years);
+
+  const spxData = await fetchSPXDataMultiYear(years);
+  console.log('SPX data points:', spxData.data.length);
   createSPXChart('spx-chart', spxData);
 
-  const sectorRSData = await fetchSectorRS(currentYear);
+  const sectorRSData = await fetchSectorRSMultiYear(years);
+  console.log('Sector RS data points:', sectorRSData.length);
   createSectorRSChart('sector-rs-chart', 'sector-rs-legend', sectorRSData);
 
-  const sectorRRSData = await fetchSectorRRS(currentYear);
+  const sectorRRSData = await fetchSectorRRSMultiYear(years);
+  console.log('Sector RRS data points:', sectorRRSData.length);
   createSectorRRSChart('sector-rrs-chart', 'sector-rrs-legend', sectorRRSData);
 
-  const industryRSData = await fetchIndustryRS(currentYear);
+  const industryRSData = await fetchIndustryRSMultiYear(years);
+  console.log('Industry RS data points:', industryRSData.length);
   createIndustryRSChart('industry-rs-chart', 'industry-rs-legend', industryRSData);
 
-  const industryRRSData = await fetchIndustryRRS(currentYear);
+  const industryRRSData = await fetchIndustryRRSMultiYear(years);
+  console.log('Industry RRS data points:', industryRRSData.length);
   createIndustryRRSChart('industry-rrs-chart', 'industry-rrs-legend', industryRRSData);
 }
 
 async function populateDateSelector() {
   const dateSelector = document.getElementById('date-selector') as HTMLSelectElement;
   
-  // 利用可能な日付を取得（最新30日）
   availableDates = await fetchAvailableDates(30);
   
-  // プルダウンに追加
   dateSelector.innerHTML = availableDates.map((date, index) => 
     `<option value="${date}">${date}${index === 0 ? ' (latest)' : ''}</option>`
   ).join('');
@@ -64,7 +71,6 @@ async function loadStockTable() {
   
   console.log(`Loading summary for ${selectedDate}...`);
   
-  // 選択日のデータを取得
   const summary = await fetchSummary(selectedDate);
   currentSummaryData = summary.stocks;
   
@@ -80,7 +86,7 @@ function updateStockTable() {
     stocksPerSector: parseInt((document.getElementById('stocksPerSector-slider') as HTMLInputElement).value),
     stocksPerIndustry: parseInt((document.getElementById('stocksPerIndustry-slider') as HTMLInputElement).value),
     scoreThreshold: parseInt((document.getElementById('score-slider') as HTMLInputElement).value),
-    days: 1,  // 未使用（互換性のため残す）
+    days: 1,
   };
   
   createStockTable('stock-table-container', currentSummaryData, filters);
@@ -117,7 +123,6 @@ function setupFilterListeners() {
     scoreValue.textContent = scoreSlider.value;
   });
   
-  // Apply ボタン
   document.getElementById('apply-filters')!.addEventListener('click', async () => {
     await loadStockTable();
   });
@@ -131,13 +136,8 @@ async function main() {
     lastUpdatedEl.textContent = `Last Updated: ${new Date(metadata.lastUpdated).toLocaleString()}`;
 
     await loadCharts();
-    
-    // 日付プルダウンを設定
     await populateDateSelector();
-    
     setupFilterListeners();
-    
-    // 初期データ読み込み（最新日）
     await loadStockTable();
 
     console.log('✅ Dashboard loaded successfully!');

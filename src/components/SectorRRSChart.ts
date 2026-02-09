@@ -6,6 +6,8 @@ const COLORS = [
   '#00B8D4', '#FF1744', '#76FF03', '#F50057', '#00E5FF'
 ];
 
+const DEFAULT_VISIBLE_BARS = 100;
+
 export function createSectorRRSChart(
   chartContainerId: string,
   legendContainerId: string,
@@ -64,6 +66,13 @@ export function createSectorRRSChart(
       latestRank: sectorData[sectorData.length - 1]?.value || 0,
     };
   });
+
+  const allDates = [...new Set(data.map(d => d.date))].sort();
+  if (allDates.length > DEFAULT_VISIBLE_BARS) {
+    const from = allDates[allDates.length - DEFAULT_VISIBLE_BARS];
+    const to = allDates[allDates.length - 1];
+    chart.timeScale().setVisibleRange({ from, to });
+  }
 
   legendContainer.innerHTML = '';
   rankings
