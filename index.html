@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Market Dashboard</title>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>📊 Market Dashboard</h1>
+      <p id="last-updated">Loading...</p>
+    </header>
+    
+    <main>
+      <!-- S&P500 チャート -->
+      <section class="chart-section">
+        <h2>S&P 500</h2>
+        <div id="spx-chart" class="chart-container"></div>
+      </section>
+      
+      <!-- セクターRS チャート -->
+      <section class="chart-section">
+        <h2>Sector RS Rankings (Top 10)</h2>
+        <div class="chart-wrapper">
+          <div id="sector-rs-chart" class="chart-container"></div>
+          <div id="sector-rs-legend" class="legend"></div>
+        </div>
+      </section>
+      
+      <!-- セクターRRS チャート -->
+      <section class="chart-section">
+        <h2>Sector RRS Rankings (Top 10)</h2>
+        <div class="chart-wrapper">
+          <div id="sector-rrs-chart" class="chart-container"></div>
+          <div id="sector-rrs-legend" class="legend"></div>
+        </div>
+      </section>
+      
+      <!-- 業種RS チャート -->
+      <section class="chart-section">
+        <h2>Industry RS Rankings (Top 20)</h2>
+        <div class="chart-wrapper">
+          <div id="industry-rs-chart" class="chart-container"></div>
+          <div id="industry-rs-legend" class="legend"></div>
+        </div>
+      </section>
+      
+      <!-- 業種RRS チャート -->
+      <section class="chart-section">
+        <h2>Industry RRS Rankings (Top 20)</h2>
+        <div class="chart-wrapper">
+          <div id="industry-rrs-chart" class="chart-container"></div>
+          <div id="industry-rrs-legend" class="legend"></div>
+        </div>
+      </section>
+      
+      <!-- Stock Table -->
+      <section class="chart-section">
+        <h2>Top Stocks by Sector & Industry</h2>
+        
+        <!-- フィルター -->
+        <div class="filters">
+          <div class="filter-section">
+            <h3>Sector Filters</h3>
+            <div class="filter-group">
+              <label>
+                TOP N Sectors: <span id="topSectors-value">10</span>
+                <input type="range" id="topSectors-slider" min="1" max="50" value="10" step="1">
+              </label>
+            </div>
+            
+            <div class="filter-group">
+              <label>
+                Stocks per Sector: <span id="stocksPerSector-value">3</span>
+                <input type="range" id="stocksPerSector-slider" min="1" max="10" value="3" step="1">
+              </label>
+            </div>
+          </div>
+          
+          <div class="filter-section">
+            <h3>Industry Filters</h3>
+            <div class="filter-group">
+              <label>
+                TOP N Industries: <span id="topIndustries-value">10</span>
+                <input type="range" id="topIndustries-slider" min="1" max="50" value="10" step="1">
+              </label>
+            </div>
+            
+            <div class="filter-group">
+              <label>
+                Stocks per Industry: <span id="stocksPerIndustry-value">3</span>
+                <input type="range" id="stocksPerIndustry-slider" min="1" max="10" value="3" step="1">
+              </label>
+            </div>
+          </div>
+          
+          <div class="filter-section">
+            <h3>General Filters</h3>
+            <div class="filter-group">
+              <label>
+                Score Threshold: <span id="score-value">70</span>
+                <input type="range" id="score-slider" min="0" max="99" value="70" step="5">
+              </label>
+            </div>
+            
+            <div class="filter-group">
+              <label>
+                Last P Days: <span id="days-value">1</span>
+                <input type="range" id="days-slider" min="1" max="30" value="1" step="1">
+              </label>
+            </div>
+          </div>
+          
+          <button id="apply-filters" class="btn-primary">Apply Filters</button>
+        </div>
+        
+        <div id="stock-table-container"></div>
+      </section>
+    </main>
+  </div>
+  
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
