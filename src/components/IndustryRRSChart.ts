@@ -28,7 +28,7 @@ export function createIndustryRRSChart(
 
   const latestDate = validData[validData.length - 1]?.date;
   const latestData = validData.filter(d => d.date === latestDate);
-  const top20Industries = latestData
+  const top10Industries = latestData
     .sort((a, b) => a.rank - b.rank)
     .slice(0, 10)
     .map(d => d.industry!);
@@ -53,7 +53,11 @@ export function createIndustryRRSChart(
     },
   });
 
-  const rankings = top20Industries.map((industry, index) => {
+  const seriesMap = new Map<string, any>();
+  const dataMap = new Map<string, any[]>();
+  const visibilityMap = new Map<string, boolean>();
+
+  const rankings = top10Industries.map((industry, index) => {
     const industryData = validData
       .filter(d => d.industry === industry)
       .map(d => ({
@@ -67,6 +71,10 @@ export function createIndustryRRSChart(
     });
 
     lineSeries.setData(industryData);
+
+    seriesMap.set(industry, lineSeries);
+    dataMap.set(industry, industryData);
+    visibilityMap.set(industry, true);
 
     return {
       name: industry,
@@ -93,6 +101,23 @@ export function createIndustryRRSChart(
         <div class="legend-label" title="${item.name}">${item.name}</div>
         <div class="legend-rank">#${item.latestRank}</div>
       `;
+      
+      legendItem.addEventListener('click', () => {
+        const isVisible = visibilityMap.get(item.name);
+        const series = seriesMap.get(item.name);
+        const originalData = dataMap.get(item.name);
+        
+        if (isVisible) {
+          series.setData([]);
+          legendItem.style.opacity = '0.4';
+          visibilityMap.set(item.name, false);
+        } else {
+          series.setData(originalData);
+          legendItem.style.opacity = '1';
+          visibilityMap.set(item.name, true);
+        }
+      });
+      
       legendContainer.appendChild(legendItem);
     });
 

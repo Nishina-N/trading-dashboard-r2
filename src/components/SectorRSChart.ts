@@ -6,6 +6,8 @@ const COLORS = [
   '#00B8D4', '#FF1744', '#76FF03', '#F50057', '#00E5FF'
 ];
 
+const DEFAULT_VISIBLE_BARS = 100;
+
 export function createSectorRSChart(
   chartContainerId: string,
   legendContainerId: string,
@@ -43,6 +45,11 @@ export function createSectorRSChart(
     },
   });
 
+  // シリーズとデータを保持
+  const seriesMap = new Map<string, any>();
+  const dataMap = new Map<string, any[]>();
+  const visibilityMap = new Map<string, boolean>();
+
   const rankings = top10Sectors.map((sector, index) => {
     const sectorData = data
       .filter(d => d.sector === sector)
@@ -58,6 +65,11 @@ export function createSectorRSChart(
 
     lineSeries.setData(sectorData);
 
+    // 保存
+    seriesMap.set(sector, lineSeries);
+    dataMap.set(sector, sectorData);
+    visibilityMap.set(sector, true);
+
     return {
       name: sector,
       color: COLORS[index % COLORS.length],
@@ -65,6 +77,15 @@ export function createSectorRSChart(
     };
   });
 
+  // 直近N本のデータを表示
+  const allDates = [...new Set(data.map(d => d.date))].sort();
+  if (allDates.length > DEFAULT_VISIBLE_BARS) {
+    const from = allDates[allDates.length - DEFAULT_VISIBLE_BARS];
+    const to = allDates[allDates.length - 1];
+    chart.timeScale().setVisibleRange({ from, to });
+  }
+
+  // 凡例作成（クリックイベント付き）
   legendContainer.innerHTML = '';
   rankings
     .sort((a, b) => a.latestRank - b.latestRank)
@@ -76,6 +97,26 @@ export function createSectorRSChart(
         <div class="legend-label" title="${item.name}">${item.name}</div>
         <div class="legend-rank">#${item.latestRank}</div>
       `;
+      
+      // クリックで表示/非表示切り替え
+      legendItem.addEventListener('click', () => {
+        const isVisible = visibilityMap.get(item.name);
+        const series = seriesMap.get(item.name);
+        const originalData = dataMap.get(item.name);
+        
+        if (isVisible) {
+          // 非表示にする
+          series.setData([]);
+          legendItem.style.opacity = '0.4';
+          visibilityMap.set(item.name, false);
+        } else {
+          // 再表示する
+          series.setData(originalData);
+          legendItem.style.opacity = '1';
+          visibilityMap.set(item.name, true);
+        }
+      });
+      
       legendContainer.appendChild(legendItem);
     });
 

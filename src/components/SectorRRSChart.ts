@@ -45,6 +45,10 @@ export function createSectorRRSChart(
     },
   });
 
+  const seriesMap = new Map<string, any>();
+  const dataMap = new Map<string, any[]>();
+  const visibilityMap = new Map<string, boolean>();
+
   const rankings = top10Sectors.map((sector, index) => {
     const sectorData = data
       .filter(d => d.sector === sector)
@@ -59,6 +63,10 @@ export function createSectorRRSChart(
     });
 
     lineSeries.setData(sectorData);
+
+    seriesMap.set(sector, lineSeries);
+    dataMap.set(sector, sectorData);
+    visibilityMap.set(sector, true);
 
     return {
       name: sector,
@@ -85,6 +93,23 @@ export function createSectorRRSChart(
         <div class="legend-label" title="${item.name}">${item.name}</div>
         <div class="legend-rank">#${item.latestRank}</div>
       `;
+      
+      legendItem.addEventListener('click', () => {
+        const isVisible = visibilityMap.get(item.name);
+        const series = seriesMap.get(item.name);
+        const originalData = dataMap.get(item.name);
+        
+        if (isVisible) {
+          series.setData([]);
+          legendItem.style.opacity = '0.4';
+          visibilityMap.set(item.name, false);
+        } else {
+          series.setData(originalData);
+          legendItem.style.opacity = '1';
+          visibilityMap.set(item.name, true);
+        }
+      });
+      
       legendContainer.appendChild(legendItem);
     });
 
