@@ -21,13 +21,17 @@ export interface SPXData {
 // スコアデータ型
 export interface ScoreData {
   date: string;
+  ticker?: string;
   sector?: string;
   industry?: string;
+  rs?: number;
   rs_raw?: number;
   rs_percentile?: number;
+  rrs?: number;
   rrs_raw?: number;
   rrs_percentile?: number;
-  rank: number;
+  bp_raw?: number;  // ← 追加
+  rank?: number;
   stock_count?: number;
 }
 

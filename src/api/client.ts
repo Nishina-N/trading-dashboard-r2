@@ -114,3 +114,36 @@ export async function fetchSummaries(dates: string[]): Promise<any[]> {
   const promises = dates.map(date => fetchSummary(date));
   return Promise.all(promises);
 }
+
+// BuyPressure
+export async function fetchSectorBP(year: number): Promise<any[]> {
+  const response = await fetch(`${API_BASE}/api/scores/BuyPressure/sector/${year}`);
+  if (!response.ok) throw new Error('Failed to fetch Sector BP');
+  return response.json();
+}
+
+export async function fetchSectorBPMultiYear(years: number[]): Promise<any[]> {
+  const promises = years.map(year => fetchSectorBP(year));
+  const results = await Promise.all(promises);
+  
+  const combined = results.flat();
+  combined.sort((a, b) => a.date.localeCompare(b.date));
+  
+  return combined;
+}
+
+export async function fetchIndustryBP(year: number): Promise<any[]> {
+  const response = await fetch(`${API_BASE}/api/scores/BuyPressure/industry/${year}`);
+  if (!response.ok) throw new Error('Failed to fetch Industry BP');
+  return response.json();
+}
+
+export async function fetchIndustryBPMultiYear(years: number[]): Promise<any[]> {
+  const promises = years.map(year => fetchIndustryBP(year));
+  const results = await Promise.all(promises);
+  
+  const combined = results.flat();
+  combined.sort((a, b) => a.date.localeCompare(b.date));
+  
+  return combined;
+}

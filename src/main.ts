@@ -5,17 +5,22 @@ import { createSectorRRSChart } from './components/SectorRRSChart';
 import { createIndustryRSChart } from './components/IndustryRSChart';
 import { createIndustryRRSChart } from './components/IndustryRRSChart';
 import { createStockTable } from './components/StockTable';
+import { createSectorBPChart } from './components/SectorBPChart';
+import { createIndustryBPChart } from './components/IndustryBPChart';
 import {
   fetchSPXDataMultiYear,
   fetchSectorRSMultiYear,
   fetchSectorRRSMultiYear,
   fetchIndustryRSMultiYear,
   fetchIndustryRRSMultiYear,
+  fetchSectorBPMultiYear,    
+  fetchIndustryBPMultiYear,    
   fetchMetadata,
   fetchAvailableDates,
   fetchSummary,
 } from './api/client';
 import type { StockSummary, FilterSettings } from './types/data';
+
 
 let currentSummaryData: StockSummary[] = [];
 let availableDates: string[] = [];
@@ -46,6 +51,16 @@ async function loadCharts() {
   const industryRRSData = await fetchIndustryRRSMultiYear(years);
   console.log('Industry RRS data points:', industryRRSData.length);
   createIndustryRRSChart('industry-rrs-chart', 'industry-rrs-legend', industryRRSData);
+
+  // Sector BuyPressure
+  const sectorBPData = await fetchSectorBPMultiYear(years);
+  createSectorBPChart('sector-bp-chart', 'sector-bp-legend', sectorBPData);
+
+  // Industry BuyPressure
+  const industryBPData = await fetchIndustryBPMultiYear(years);
+  createIndustryBPChart('industry-bp-chart', 'industry-bp-legend', industryBPData);
+
+  
 }
 
 async function populateDateSelector() {

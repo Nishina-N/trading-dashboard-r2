@@ -93,6 +93,41 @@ export default {
         });
       }
 
+
+      // ルート: /api/scores/BuyPressure/{category}/{year}
+      if (url.pathname.startsWith('/api/scores/BuyPressure/')) {
+        const match = url.pathname.match(/^\/api\/scores\/BuyPressure\/(sector|industry)\/(\d{4})$/);
+        if (!match) {
+          return new Response(JSON.stringify({ error: 'Invalid path format' }), { 
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+        
+        const [, category, year] = match;
+        const key = `scores/BuyPressure/${category}/${year}.json`;
+        
+        const object = await env.STOCK_DATA.get(key);
+        
+        if (!object) {
+          return new Response(JSON.stringify({ error: 'Not found', key }), { 
+            status: 404,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+        
+        const text = await object.text();
+        const sanitized = sanitizeJSON(text);
+        
+        return new Response(sanitized, {
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+            'Cache-Control': 'public, max-age=3600',
+          },
+        });
+      }
+
       // ルート: /api/stocks/summary/dates?limit=N を追加
       if (url.pathname === '/api/stocks/summary/dates') {
         const limit = parseInt(url.searchParams.get('limit') || '30');
