@@ -3,9 +3,7 @@ import type { ScoreData } from '../types/data';
 
 const COLORS = [
   '#2962FF', '#FF6D00', '#00C853', '#D500F9', '#FFD600',
-  '#00B8D4', '#FF1744', '#76FF03', '#F50057', '#00E5FF',
-  '#6200EA', '#FF5252', '#00E676', '#FF9100', '#00BFA5',
-  '#651FFF', '#FF6E40', '#00C853', '#FFC400', '#18FFFF'
+  '#00B8D4', '#FF1744', '#76FF03', '#F50057', '#00E5FF'
 ];
 
 const DEFAULT_VISIBLE_BARS = 100;
@@ -29,7 +27,7 @@ export function createIndustryRSChart(
   const latestDate = validData[validData.length - 1]?.date;
   const latestData = validData.filter(d => d.date === latestDate);
   const top10Industries = latestData
-    .sort((a, b) => a.rank - b.rank)
+    .sort((a, b) => (a.rank || 999) - (b.rank || 999))
     .slice(0, 10)
     .map(d => d.industry!);
 
@@ -59,10 +57,10 @@ export function createIndustryRSChart(
 
   const rankings = top10Industries.map((industry, index) => {
     const industryData = validData
-      .filter(d => d.industry === industry)
+      .filter(d => d.industry === industry && d.rank !== undefined)
       .map(d => ({
         time: d.date,
-        value: d.rank,
+        value: d.rank!,
       }));
 
     const lineSeries = chart.addSeries(LineSeries, {
@@ -79,7 +77,7 @@ export function createIndustryRSChart(
     return {
       name: industry,
       color: COLORS[index % COLORS.length],
-      latestRank: industryData[industryData.length - 1]?.value || 0,
+      latestRank: industryData[industryData.length - 1]?.value || 999,
     };
   });
 

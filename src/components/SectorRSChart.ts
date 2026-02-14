@@ -21,7 +21,7 @@ export function createSectorRSChart(
   const latestDate = data[data.length - 1]?.date;
   const latestData = data.filter(d => d.date === latestDate);
   const top10Sectors = latestData
-    .sort((a, b) => a.rank - b.rank)
+    .sort((a, b) => (a.rank || 999) - (b.rank || 999))
     .slice(0, 10)
     .map(d => d.sector!);
 
@@ -45,17 +45,16 @@ export function createSectorRSChart(
     },
   });
 
-  // シリーズとデータを保持
   const seriesMap = new Map<string, any>();
   const dataMap = new Map<string, any[]>();
   const visibilityMap = new Map<string, boolean>();
 
   const rankings = top10Sectors.map((sector, index) => {
     const sectorData = data
-      .filter(d => d.sector === sector)
+      .filter(d => d.sector === sector && d.rank !== undefined)
       .map(d => ({
         time: d.date,
-        value: d.rank,
+        value: d.rank!,
       }));
 
     const lineSeries = chart.addSeries(LineSeries, {
@@ -65,7 +64,6 @@ export function createSectorRSChart(
 
     lineSeries.setData(sectorData);
 
-    // 保存
     seriesMap.set(sector, lineSeries);
     dataMap.set(sector, sectorData);
     visibilityMap.set(sector, true);
@@ -73,11 +71,10 @@ export function createSectorRSChart(
     return {
       name: sector,
       color: COLORS[index % COLORS.length],
-      latestRank: sectorData[sectorData.length - 1]?.value || 0,
+      latestRank: sectorData[sectorData.length - 1]?.value || 999,
     };
   });
 
-  // 直近N本のデータを表示
   const allDates = [...new Set(data.map(d => d.date))].sort();
   if (allDates.length > DEFAULT_VISIBLE_BARS) {
     const from = allDates[allDates.length - DEFAULT_VISIBLE_BARS];
@@ -85,7 +82,6 @@ export function createSectorRSChart(
     chart.timeScale().setVisibleRange({ from, to });
   }
 
-  // 凡例作成（クリックイベント付き）
   legendContainer.innerHTML = '';
   rankings
     .sort((a, b) => a.latestRank - b.latestRank)
@@ -98,19 +94,16 @@ export function createSectorRSChart(
         <div class="legend-rank">#${item.latestRank}</div>
       `;
       
-      // クリックで表示/非表示切り替え
       legendItem.addEventListener('click', () => {
         const isVisible = visibilityMap.get(item.name);
         const series = seriesMap.get(item.name);
         const originalData = dataMap.get(item.name);
         
         if (isVisible) {
-          // 非表示にする
           series.setData([]);
           legendItem.style.opacity = '0.4';
           visibilityMap.set(item.name, false);
         } else {
-          // 再表示する
           series.setData(originalData);
           legendItem.style.opacity = '1';
           visibilityMap.set(item.name, true);

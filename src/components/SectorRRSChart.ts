@@ -21,7 +21,7 @@ export function createSectorRRSChart(
   const latestDate = data[data.length - 1]?.date;
   const latestData = data.filter(d => d.date === latestDate);
   const top10Sectors = latestData
-    .sort((a, b) => a.rank - b.rank)
+    .sort((a, b) => (a.rank || 999) - (b.rank || 999))
     .slice(0, 10)
     .map(d => d.sector!);
 
@@ -51,10 +51,10 @@ export function createSectorRRSChart(
 
   const rankings = top10Sectors.map((sector, index) => {
     const sectorData = data
-      .filter(d => d.sector === sector)
+      .filter(d => d.sector === sector && d.rank !== undefined)
       .map(d => ({
         time: d.date,
-        value: d.rank,
+        value: d.rank!,
       }));
 
     const lineSeries = chart.addSeries(LineSeries, {
@@ -71,7 +71,7 @@ export function createSectorRRSChart(
     return {
       name: sector,
       color: COLORS[index % COLORS.length],
-      latestRank: sectorData[sectorData.length - 1]?.value || 0,
+      latestRank: sectorData[sectorData.length - 1]?.value || 999,
     };
   });
 
