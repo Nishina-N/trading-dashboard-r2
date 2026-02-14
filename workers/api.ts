@@ -59,9 +59,9 @@ export default {
         });
       }
       
-      // ルート: /api/scores/{scoreType}/{category}/{year}
-      if (url.pathname.startsWith('/api/scores/')) {
-        const match = url.pathname.match(/^\/api\/scores\/(RS_scores|RRS_scores)\/(individual|sector|industry)\/(\d{4})$/);
+      // ルート: /api/scores/BuyPressure/{category}/{year}
+      if (url.pathname.startsWith('/api/scores/BuyPressure/')) {
+        const match = url.pathname.match(/^\/api\/scores\/BuyPressure\/(sector|industry)\/(\d{4})$/);
         if (!match) {
           return new Response(JSON.stringify({ error: 'Invalid path format' }), { 
             status: 400,
@@ -69,8 +69,8 @@ export default {
           });
         }
         
-        const [, scoreType, category, year] = match;
-        const key = `scores/${scoreType}/${category}/${year}.json`;
+        const [, category, year] = match;
+        const key = `scores/BuyPressure/${category}/${year}.json`;
         
         const object = await env.STOCK_DATA.get(key);
         
@@ -94,9 +94,9 @@ export default {
       }
 
 
-      // ルート: /api/scores/BuyPressure/{category}/{year}
-      if (url.pathname.startsWith('/api/scores/BuyPressure/')) {
-        const match = url.pathname.match(/^\/api\/scores\/BuyPressure\/(sector|industry)\/(\d{4})$/);
+      // ルート: /api/scores/{scoreType}/{category}/{year}
+      if (url.pathname.startsWith('/api/scores/')) {
+        const match = url.pathname.match(/^\/api\/scores\/(RS_scores|RRS_scores)\/(individual|sector|industry)\/(\d{4})$/);
         if (!match) {
           return new Response(JSON.stringify({ error: 'Invalid path format' }), { 
             status: 400,
@@ -104,8 +104,8 @@ export default {
           });
         }
         
-        const [, category, year] = match;
-        const key = `scores/BuyPressure/${category}/${year}.json`;
+        const [, scoreType, category, year] = match;
+        const key = `scores/${scoreType}/${category}/${year}.json`;
         
         const object = await env.STOCK_DATA.get(key);
         
